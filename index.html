@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lisa Rentz — Design Direction &amp; Photography</title>
+<link rel="stylesheet" href="https://use.typekit.net/ugc1itj.css">
+<style>
+  :root{
+    --bg: #fafaf8;
+    --bg-alt: #f2f1ed;
+    --ink: #17171a;
+    --ink-soft: #6b6b6f;
+    --line: rgba(23,23,26,0.1);
+    --accent: #b6491f; /* warm terracotta, single accent */
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"futura-pt", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{display:block; width:100%; height:100%; object-fit:cover;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 40px;}
+
+  /* ---------- INTRO ---------- */
+  #intro{
+    position:fixed; inset:0; z-index:100;
+    background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .8s var(--ease);
+  }
+  #intro.hide{opacity:0; pointer-events:none;}
+  .frame-stage{
+    position:relative;
+    width:min(34vw, 420px);
+    aspect-ratio:1/1;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.18);
+    background:#ddd;
+  }
+  .frame-stage img{
+    position:absolute; inset:0;
+    opacity:0;
+    transform:scale(1.04);
+  }
+  .frame-stage img.active{
+    opacity:1;
+    transition:opacity .05s linear;
+  }
+  #intro.settled .frame-stage{
+    transition:width .9s var(--ease), height .9s var(--ease), box-shadow .9s var(--ease);
+  }
+  #intro.photo-fade .frame-stage{opacity:0; transition:opacity .7s var(--ease);}
+  .intro-logo{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0;
+    transition:opacity 1s var(--ease);
+    pointer-events:none;
+  }
+  .intro-logo.show{opacity:1;}
+  .intro-logo img{width:min(76vw, 640px); height:auto;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    padding:22px 0;
+    opacity:0; transform:translateY(-8px);
+    transition:opacity .6s var(--ease), transform .6s var(--ease);
+  }
+  header.show{opacity:1; transform:translateY(0);}
+  nav{display:flex; align-items:center; justify-content:space-between;}
+  .logo{display:flex; align-items:center; opacity:1; transition:opacity .4s var(--ease);}
+  header.scrolled .logo{opacity:0;}
+  .logo img{width:auto; height:20px; display:block;}
+  .navlinks{
+    display:flex; align-items:center; gap:32px; font-size:13px; letter-spacing:.03em;
+    background:var(--bg);
+    padding:14px 28px;
+  }
+  .navlinks a{position:relative; padding:4px 0; color:var(--ink-soft); transition:color .25s;}
+  .navlinks a:hover{color:var(--ink);}
+  .navlinks a.current{color:var(--ink);}
+
+  /* Desktop: collapse the nav pill into a minimal black square once scrolled,
+     since the logo is gone by then; hovering reveals the words again. */
+  @media (min-width:901px){
+    .navlinks{
+      position:relative;
+      max-width:400px;
+      height:52px;
+      overflow:hidden;
+      white-space:nowrap;
+      transition:max-width .5s var(--ease), padding .5s var(--ease), background .4s var(--ease);
+    }
+    .navlinks a{transition:color .25s, opacity .25s var(--ease);}
+    header.scrolled .navlinks{
+      max-width:52px;
+      padding:0;
+      background:var(--ink);
+    }
+    header.scrolled .navlinks a{opacity:0; pointer-events:none;}
+    header.scrolled .navlinks:hover{
+      max-width:400px;
+      padding:14px 28px;
+      background:var(--bg);
+    }
+    header.scrolled .navlinks:hover a{opacity:1; pointer-events:auto; transition-delay:.15s;}
+  }
+  .nav-toggle{
+    display:none;
+    position:relative;
+    width:44px; height:44px;
+    background:rgba(250,250,248,0.55);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:none; padding:0; cursor:pointer;
+  }
+  .nav-toggle span{
+    position:absolute; left:13px; right:13px; height:2px;
+    background:var(--ink);
+    transition:transform .3s var(--ease), opacity .3s var(--ease), top .3s var(--ease);
+  }
+  .nav-toggle span:nth-child(1){top:15px;}
+  .nav-toggle span:nth-child(2){top:21px;}
+  .nav-toggle span:nth-child(3){top:27px;}
+  .nav-toggle.open span:nth-child(1){top:21px; transform:rotate(45deg);}
+  .nav-toggle.open span:nth-child(2){opacity:0;}
+  .nav-toggle.open span:nth-child(3){top:21px; transform:rotate(-45deg);}
+
+  /* ---------- LANDING (Selected Work, first view) ---------- */
+  .section.landing{
+    padding-top:150px;
+  }
+  .landing{
+    opacity:0; transform:translateY(14px);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  .landing.show{opacity:1; transform:translateY(0);}
+  .landing-work-head{margin-top:0;}
+  .eyebrow{
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:22px; font-weight:600;
+  }
+  h1.headline{
+    font-size:clamp(2.4rem, 5.4vw, 4.6rem);
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    font-weight:600;
+    max-width:15ch;
+  }
+  .hero-sub{
+    margin-top:26px;
+    font-size:18px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-width:46ch;
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section{padding:120px 0;}
+  .section-alt{background:var(--bg-alt);}
+  .section-head{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    margin-bottom:56px; gap:20px; flex-wrap:wrap;
+  }
+  .section-head .eyebrow{margin-bottom:10px;}
+  .section-head h2{
+    font-size:clamp(1.6rem, 3vw, 2.4rem);
+    letter-spacing:-0.01em; font-weight:600;
+  }
+  .section-head .desc{
+    max-width:38ch; color:var(--ink-soft); font-size:15px; line-height:1.6;
+    text-align:justify; text-align-last:left;
+  }
+  .desc-accent{color:var(--accent);}
+  .view-all{font-size:13px; letter-spacing:.03em; border-bottom:1px solid var(--ink); padding-bottom:2px; white-space:nowrap;}
+
+  /* reveal-on-scroll */
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- GRID / CARDS ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:28px;
+  }
+  .card{
+    position:relative;
+    cursor:pointer;
+  }
+  .card .frame{
+    position:relative;
+    aspect-ratio:4/5;
+    border-radius:0;
+    overflow:hidden;
+    background:#e7e5e0;
+  }
+  #workGrid{grid-template-columns:repeat(2, 1fr);}
+  #workGrid .card .frame{aspect-ratio:1/1;}
+  .card .frame img{
+    transition:transform 1.1s var(--ease);
+  }
+  #photoGrid .card .frame{background:var(--bg-alt);}
+  #photoGrid .card .frame img{object-fit:contain;}
+  .card:hover .frame img{transform:scale(1.06);}
+  .grid.photo{grid-template-columns:repeat(4, 1fr);}
+
+  #workGrid .card .frame img{transition:transform 1.1s var(--ease), opacity .35s var(--ease);}
+  #workGrid .card:hover .frame img{opacity:.35;}
+  .work-category{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:0 24px;
+    font-size:18px; letter-spacing:.18em; text-transform:uppercase;
+    color:#3d3d40;
+    opacity:0;
+    transition:opacity .35s var(--ease);
+    pointer-events:none;
+  }
+  #workGrid .card:hover .work-category{opacity:1;}
+
+  /* ---------- ABOUT ---------- */
+  .about-simple{
+    max-width:640px;
+  }
+  .about-simple .about-headline{
+    font-size:clamp(2rem, 4vw, 3rem);
+    max-width:none;
+    margin-top:14px;
+    text-align:justify;
+    text-align-last:left;
+  }
+  .about-simple .hero-sub{
+    margin-top:22px;
+    max-width:none;
+  }
+  .about-simple p{
+    font-size:17px; line-height:1.75; color:var(--ink-soft); margin-bottom:20px;
+    text-align:justify; text-align-last:left;
+  }
+  .about-simple p strong{color:var(--ink); font-weight:600;}
+  .about-simple .view-all{display:inline-block; margin-top:8px;}
+  .about-logo{width:auto; height:clamp(28px, 4vw, 36px); margin-bottom:20px;}
+  .footer-logo-large{
+    display:block;
+    width:100%;
+    height:auto;
+    margin:64px 0 0;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:80px 0 50px; border-top:1px solid var(--line);}
+  .footer-top{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:30px;
+    margin-bottom:60px;
+  }
+  footer h3{font-size:clamp(1.1rem,5.5vw,2.6rem); font-weight:600; letter-spacing:-0.01em; white-space:nowrap;}
+  .footer-contact{
+    font-size:15px; color:var(--ink-soft);
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px;
+  }
+  .footer-contact a{color:var(--ink); border-bottom:1px solid var(--line);}
+  .footer-contact a.social-icon{
+    border-bottom:none;
+    display:inline-flex; align-items:center;
+    color:var(--ink-soft);
+    transition:color .25s;
+  }
+  .footer-contact a.social-icon:hover{color:var(--ink);}
+  .social-icon svg{width:20px; height:20px;}
+  .email-icon{position:relative;}
+  .email-icon .tooltip{
+    position:absolute;
+    bottom:calc(100% + 10px);
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    background:var(--ink);
+    color:#fff;
+    font-size:12px;
+    padding:6px 10px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s var(--ease);
+  }
+  .email-icon:hover .tooltip{opacity:1;}
+
+  /* ---------- WORK LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(12,12,12,0.94);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .35s var(--ease);
+  }
+  .lightbox.open{opacity:1; pointer-events:auto;}
+  .lightbox-stage{
+    position:relative;
+    width:min(70vw, 860px);
+    height:min(78vh, 860px);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lightbox-stage img, .lightbox-stage video{
+    width:auto; height:auto; max-width:100%; max-height:100%;
+    object-fit:contain;
+    border-radius:0;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+  }
+  .lightbox-close, .lightbox-nav{
+    position:absolute;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.3);
+    background:rgba(255,255,255,0.04);
+    transition:background .25s;
+    user-select:none;
+  }
+  .lightbox-close:hover, .lightbox-nav:hover{background:rgba(255,255,255,0.16);}
+  .lightbox-close{
+    top:24px; right:28px;
+    width:40px; height:40px;
+    font-size:22px;
+  }
+  .lightbox-nav{
+    top:50%; transform:translateY(-50%);
+    width:52px; height:52px;
+    font-size:26px;
+  }
+  .lightbox-prev{left:24px;}
+  .lightbox-next{right:24px;}
+  .lightbox-counter{
+    position:absolute; bottom:28px; left:0; right:0;
+    text-align:center; color:rgba(255,255,255,0.65);
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  }
+
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .grid.photo{grid-template-columns:repeat(2,1fr);}
+    .about-split{grid-template-columns:1fr; gap:36px;}
+    .wrap{padding:0 22px;}
+    .section{padding:80px 0;}
+    .lightbox-stage{width:88vw; height:64vh;}
+    .lightbox-nav{display:none;}
+    .work-category{font-size:11px; letter-spacing:.1em; padding:0 12px;}
+
+    .nav-toggle{display:block;}
+    nav{position:relative;}
+    .navlinks{
+      flex-direction:column; align-items:flex-start; gap:0;
+      position:absolute; top:56px; right:0; left:auto;
+      min-width:200px;
+      padding:10px 0;
+      max-height:0; opacity:0; overflow:hidden;
+      transition:max-height .35s var(--ease), opacity .25s var(--ease);
+    }
+    .navlinks a{padding:14px 24px; width:100%;}
+    .navlinks.open{max-height:220px; opacity:1;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="frame-stage" id="frameStage"></div>
+    <div class="intro-logo" id="introLogo"><img src="images/logo.svg" alt="Lisa Rentz"></div>
+  </div>
+
+  <!-- NAV -->
+  <header id="siteHeader">
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="#work"><img src="images/logo.svg" alt="Lisa Rentz"></a>
+        <div class="navlinks" id="navlinks">
+          <a href="#work" class="current">Work</a>
+          <a href="#photography">Photography</a>
+          <a href="#about">About</a>
+        </div>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navlinks">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- FEATURED WORK (landing) -->
+  <section class="section landing" id="work">
+    <div class="wrap">
+      <div class="section-head reveal landing-work-head">
+        <div>
+          <div class="eyebrow">Selected Work</div>
+          <h2>Design Direction</h2>
+          <p class="desc">Brand identity, packaging, and collateral.</p>
+        </div>
+      </div>
+      <div class="grid reveal" id="workGrid"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="wrap reveal">
+      <div class="about-simple">
+        <img class="about-logo" src="images/logo.svg" alt="Lisa Rentz">
+        <div class="eyebrow">Design Director • Photographer</div>
+        <h1 class="headline about-headline">Over two decades shaping brands. A lifetime of framing beauty in the details.</h1>
+        <p class="hero-sub">I'm a global design director and brand strategist with over two decades building brand identity and packaging for one of beauty's most iconic names. My work spans from reimagining heritage franchises, designing trend-setting launches, collateral and promotional gifting programs, and collaborating with cultural institutions and influential global creatives. My focus has always been the through-line from concept to shelf: trend research, concepting, CMF consistency, and prototyping through to global production, with an eye for detail that's earned several global packaging patents and a Prix Formes Deluxe Award along the way.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTOGRAPHY -->
+  <section class="section section-alt" id="photography">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <div class="eyebrow">Photography</div>
+          <p class="desc desc-accent">Outside of brand work, I've spent a lifetime with a camera: street, portrait, travel, architecture, and darkroom-manipulated photograms. Yes, the subject matters, but it's really about the noticing: a moment, the light, the thing most people walk past without seeing. This section is where that eye lives on its own terms, with the same passion for meticulous detail.</p>
+        </div>
+        <a class="view-all" href="#" id="viewGallery">View gallery</a>
+      </div>
+      <div class="grid photo reveal" id="photoGrid"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER / CONTACT -->
+  <footer id="contact">
+    <div class="wrap">
+      <div class="footer-top">
+        <h3>Let's talk about a project.</h3>
+        <div class="footer-contact">
+          <a class="social-icon email-icon" href="mailto:lisarentz77@gmail.com" aria-label="Email">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.339.033-.67.128-.985.116-.386.319-.716.577-.965.235-.226.512-.385.809-.485.34-.113.694-.15 1.058-.15h.007c.317 0 .626.048.913.15.284.101.548.256.756.457l7.762 5.822 7.762-5.822c.208-.201.472-.356.756-.457.287-.102.596-.15.913-.15h.007c.364 0 .718.037 1.058.15.297.1.574.259.809.485.258.249.461.579.577.965.095.315.128.646.128.985z"/></svg>
+            <span class="tooltip">lisarentz77@gmail.com</span>
+          </a>
+          <a class="social-icon" href="https://www.linkedin.com/in/lisa-rentz-henry-07a2869/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a class="social-icon" href="https://www.instagram.com/lenzartis/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+        </div>
+      </div>
+      <img class="footer-logo-large" src="images/logo.svg" alt="Lisa Rentz">
+    </div>
+  </footer>
+
+  <!-- WORK LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous photo">&#8249;</div>
+    <div class="lightbox-stage">
+      <img id="lightboxImg" alt="">
+      <video id="lightboxVideo" loop playsinline style="display:none;"></video>
+    </div>
+    <div class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next photo">&#8250;</div>
+    <div class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+
+<script>
+  // ---------- Intro frame data ----------
+  const frames = [
+    {file:"01-Azuree_Dor_Btl_SUB.jpg", id:1050, label:"Azurée d'Or"},
+    {file:"02-Met_Collection_Group_Shot_on_Gold_Block.PNG", id:1015, label:"Met Collection, Group Shot"},
+    {file:"03-Beauftiful_Warhol_Ltd_SUB.PNG", id:1011, label:"Beautiful, Warhol Limited Edition"},
+    {file:"04-Luxury_Gifting_wCandle.PNG", id:1024, label:"Luxury Gifting with Candle"},
+    {file:"05-Face_Line_Up_Swish.jpg", id:1013, label:"Face Line-Up"},
+    {file:"06-Luxury_Desert Eden_LTD.jpg", id:1039, label:"Luxury Desert Eden Ltd."},
+    {file:"07-Legacy_Btl Group Shot.jpeg", id:1005, label:"Legacy Bottle Group Shot"},
+    {file:"08-Sabayasachi_Pyramid_Group_Shot.jpeg", id:1043, label:"Sabayasachi Pyramid Group Shot"},
+    {file:"09-Aramis Intuition.jpg", id:1074, label:"Aramis Intuition"},
+    {file:"10-Glimmer_Btl_on_White.jpg", id:1016, label:"Glimmer Bottle on White"}
+  ];
+
+  const stage = document.getElementById('frameStage');
+  frames.forEach((f, i) => {
+    const img = document.createElement('img');
+    img.src = `images/intro/${f.file}`;
+    img.onerror = function(){ this.onerror=null; this.src = `https://picsum.photos/id/${f.id}/900/1200`; };
+    img.alt = f.label;
+    img.dataset.index = i;
+    stage.appendChild(img);
+  });
+
+  const imgs = stage.querySelectorAll('img');
+  const intro = document.getElementById('intro');
+  const introLogo = document.getElementById('introLogo');
+
+  // Constant-speed flash through each frame
+  const delays = new Array(frames.length).fill(210);
+
+  function runIntro(){
+    let i = 0;
+    function showFrame(){
+      imgs.forEach(im => im.classList.remove('active'));
+      imgs[i].classList.add('active');
+      if (i === frames.length - 1){
+        intro.classList.add('settled');
+      }
+      if (i < frames.length - 1){
+        setTimeout(() => { i++; showFrame(); }, delays[i]);
+      } else {
+        setTimeout(showLogo, 900);
+      }
+    }
+    function showLogo(){
+      intro.classList.add('photo-fade');
+      introLogo.classList.add('show');
+      setTimeout(finishIntro, 1400);
+    }
+    function finishIntro(){
+      introLogo.classList.remove('show');
+      intro.classList.add('hide');
+      document.getElementById('siteHeader').classList.add('show');
+      document.querySelector('.landing').classList.add('show');
+      setTimeout(() => intro.remove(), 900);
+    }
+    showFrame();
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    intro.remove();
+    document.getElementById('siteHeader').classList.add('show');
+    document.querySelector('.landing').classList.add('show');
+  } else {
+    runIntro();
+  }
+
+  // ---------- Work grid ----------
+  const work = [
+    {file:"01-Face_Line_Up_Swish.jpg", id:1040, title:"Face Line-Up", category:"Makeup", slug:"face-line-up", gallery:[
+      "02-FaceHydraRescuePartialTubeCapPump.PNG",
+      "03-FaceGroupPerspective3.PNG",
+      "04-Futurist_Skintint_.jpeg",
+      "05-SP22_DW_Sheer_.jpg",
+      "06-FaceFabBtlSwatchBkgd.PNG",
+      "07-Serum Primer.jpeg",
+      "08-FaceFuturistSkinTintConcealer.PNG",
+      "09-FaceDWSecondSkinPrimer.PNG",
+      "10-IMG_2802.jpg",
+      "11-Futurist_Futurist_LR_SQ.jpg",
+      "12-FaceGroupPerspective.PNG",
+      "13-SP22_Powder.jpg",
+      "14-EL_Face_Press Powder.PNG",
+      "15-EL_Face_DW_Light_Tube.PNG",
+      "16-SkinTintMovie.mov"
+    ]},
+    {file:"02-Luxury_Desert Eden_LTD.jpg", id:1035, title:"Luxury Desert Eden Ltd.", category:"Luxury Fragrance", slug:"luxury-desert-eden", gallery:[
+      "02-LuxLabelDetail copy.PNG",
+      "03-LuxCapSuperCloseDetail.PNG",
+      "04-LuxCloseupCap.PNG",
+      "05-LuxBtlwMini copy.PNG",
+      "06-Luxury collection.jpg",
+      "07-Candles.PNG",
+      "08-LuxBtlRefillAction copy.PNG",
+      "09-Refill w 100 ml.jpg",
+      "10-Btl_Tube_ribbon.PNG",
+      "11-Travel spray Case.png",
+      "12-Travel sprays.png",
+      "13-Luxury Gifting.png",
+      "14-Luxury_w Anncill copy.jpg",
+      "15-MiniWonders_Vials_R9_RGB.jpg",
+      "16-Bottle_FC.png"
+    ]},
+    {file:"03-Legacy_Btl Group Shot.jpeg", id:1044, title:"Legacy Bottle Group Shot", category:"Legacy Luxury Fragrance", slug:"legacy-bottle-group-shot", gallery:[
+      "02-LegacyKnowingBtlSub.png",
+      "03-Legacy_mini_rose.jpg",
+      "04-Legacy 4 ml set.png",
+      "05-Legacy voc set.png",
+      "06-SP25_DIGITAL_Ultra_Luxe_Fragrance_Stills_White_Linen_OUD_Hero_KV_1080x1920.jpeg",
+      "07-WHITE_LINEN_LEGACY_OUD_BOTTLE_ON_WHITE_G9DC01.jpeg",
+      "08-SC_ALT401_UK_Legacy_White_Linen_Vanity With Core White Linen Legacy_3000x3000.jpeg"
+    ]},
+    {file:"04-Sabayasachi_Pyramid_Group_Shot.jpeg", id:1031, title:"Sabayasachi Pyramid Group Shot", category:"Collaborations", slug:"sabayasachi-pyramid", gallery:[
+      "02-Sabyasachi-.jpeg",
+      "03-opium_11-21-2025 16-55-23_1_nosound_2.mp4",
+      "04-met collection_no sound.mp4",
+      "05-DVFXEL site.jpg",
+      "06-DVF_Btl_FC.png"
+    ]},
+    {file:"05-Aramis Intuition.jpg", id:1048, title:"Aramis Intuition", category:"Men's Prestige Fragrance", slug:"aramis-intuition", gallery:[
+      "2_INTUITIONASB_LR.jpg",
+      "3_INTUITION_INTENSE_btl_LR.png",
+      "4_Intuition_EDP_ASB_Still Life_LR.png",
+      "5_AramisIntSUBBtlTubeWood_LR.png",
+      "6_AramisIntBasketball_LR.png",
+      "8_Aramis_Intuition_EDP_10ml_LR.jpg",
+      "9_AramisIntBtlFC_LR.png",
+      "10_Aramis_Intuition_EDP_VOC_LR.jpeg",
+      "10_Intuition_Duffle_lr.png"
+    ]},
+    {file:"06-Glimmer_Btl_on_White.jpg", id:1041, title:"Glimmer Bottle on White", category:"Glimmer Prestige Fragrance", slug:"glimmer-bottle-on-white", gallery:[
+      "01-Glimmer_Multi Btl.jpg",
+      "02-Glimmer_Btl_w Tubes.jpg",
+      "03-Glimmer_btls_vial _tube.png",
+      "04-Glimmer btl w FC.jpg",
+      "05-Glimmer Gift Set.png",
+      "06-VOC.png"
+    ]},
+    {file:"07-Beauftiful_Warhol_Ltd_SUB.PNG", id:1057, title:"Beautiful, Warhol Limited Edition", category:"Heritage Prestige Fragrances", slug:"Beauftiful-Warhol-Ltd-SUB", gallery:[
+      "02-Absolu1 copy.PNG",
+      "03-beau annv_no sound.mp4",
+      "04-BEAUTIFUL_MAGNOLIA.jpeg",
+      "05-FL25_Beautiful_Magnolia_Fleur.jpeg",
+      "06-FL24_2 btl Magnolia.png",
+      "07-Holiday_19_Magnolia.PNG",
+      "08-BeauMagnoliaHoliday2022Btl copy.PNG",
+      "09-Beau_Mag.jpeg",
+      "10-Btl w FC.png",
+      "12-SP21_Magnolia_Hand_Cream.jpeg",
+      "13-BelleBelleLoveBtls copy.PNG",
+      "14-BelleHoliday copy.PNG",
+      "15-BeauBelleLoveBtl3 copy.PNG",
+      "16-BeauBelle Tubes.png",
+      "17-Beau_Holiday Late Stage deco.png",
+      "18-Gold_Star_Beautiful_Source_on_white_0.jpg",
+      "19-Azuree_Dor_Btl_SUB.jpg",
+      "20-SpellBound_btl_fc.png",
+      "21-Estee Modern Muse v3 stephanmatthews.com Square copy.jpeg",
+      "22_Modern Muse Nuit_fc copy.jpg",
+      "23_Modern_Muse_Gloss_wFC copy.png"
+    ]},
+    {file:"08-Bronze-goddess-btls-3.jpg", id:1061, title:"Bronze Goddess", category:"Prestige Fragrance and Makeup Collections", slug:"Bronze-Goddess-Main-btl", gallery:[
+      "02-SP25_DIGITAL_Bronze_Goddess_Top_of_the_World_Duo_04_1080x1080.jpeg",
+      "03-EL_BG Flora_Verde_btl_only.PNG",
+      "04-BGLumiereCompact.PNG",
+      "05-BGAzurwCompacts.PNG",
+      "06-BGNuitEauBtlw3Bronzer.PNG",
+      "07-BGGroupTubeLumiere.PNG",
+      "08-BGMakeupBronzerGroup.PNG",
+      "09-BGGeleeClosedetail.PNG",
+      "10-EL_BG_Ulta Compact.jpg",
+      "11-BGTooled Compact_21.PNG",
+      "12-el_sku_GBQ901_2000x2000_0.jpeg",
+      "13-Eye_Radiant Bronzer.PNG",
+      "14-BGBronzingwSkin.PNG"
+    ]},
+  ];
+  const DEFAULT_GALLERY_SIZE = 10;
+  const workGrid = document.getElementById('workGrid');
+  work.forEach((w, wi) => {
+    workGrid.innerHTML += `
+      <div class="card" data-work-index="${wi}">
+        <div class="frame">
+          <img src="images/work/${w.file}" onerror="this.onerror=null;this.src='https://picsum.photos/id/${w.id}/700/900';" alt="${w.title}">
+          <div class="work-category">${w.category}</div>
+        </div>
+      </div>`;
+  });
+
+  // ---------- Work lightbox gallery ----------
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxVideo = document.getElementById('lightboxVideo');
+  const lightboxCounter = document.getElementById('lightboxCounter');
+  let lightboxMode = 'work';
+  let activeWork = null;
+  let activeIndex = 0;
+
+  function galleryTotal(w){
+    return w.gallery ? w.gallery.length + 1 : DEFAULT_GALLERY_SIZE;
+  }
+
+  function stopLightboxVideo(){
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute('src');
+    lightboxVideo.load();
+    lightboxVideo.style.display = 'none';
+  }
+
+  function lightboxTotal(){
+    return lightboxMode === 'photo' ? photos.length : galleryTotal(work[activeWork]);
+  }
+
+  // Work galleries: photo 1 is always the item's own cover photo, real sub-gallery
+  // files (when present) fill photos 2+, otherwise placeholders stand in.
+  // Photo galleries: a flat list of the photography grid's own images, no captions.
+  function updateLightboxImage(){
+    const n = activeIndex + 1;
+    const total = lightboxTotal();
+    let src, title, errorSrc;
+
+    if (lightboxMode === 'photo'){
+      const p = photos[activeIndex];
+      src = `images/photography/${p.file}`;
+      title = '';
+      errorSrc = `https://picsum.photos/id/${p.id}/1000/1000`;
+    } else {
+      const w = work[activeWork];
+      title = w.title;
+      if (activeIndex === 0){
+        src = `images/work/${w.file}`;
+      } else if (w.gallery){
+        src = `images/work/${w.slug}/${w.gallery[activeIndex - 1]}`;
+      } else {
+        src = `images/work/${w.slug}/${n}.jpg`;
+      }
+      errorSrc = `https://picsum.photos/seed/${w.slug}-${n}/1000/1000`;
+    }
+
+    lightboxCounter.textContent = `${n} / ${total}`;
+
+    if (/\.(mp4|webm|mov)$/i.test(src)){
+      lightboxImg.style.display = 'none';
+      lightboxImg.removeAttribute('src');
+      lightboxVideo.style.display = 'block';
+      lightboxVideo.src = src;
+      lightboxVideo.load();
+      const playPromise = lightboxVideo.play();
+      if (playPromise) playPromise.catch(() => {});
+    } else {
+      stopLightboxVideo();
+      lightboxImg.style.display = 'block';
+      lightboxImg.src = src;
+      lightboxImg.onerror = function(){ this.onerror=null; this.src = errorSrc; };
+      lightboxImg.alt = title ? `${title} — photo ${n}` : `Photo ${n}`;
+    }
+  }
+
+  function openLightbox(mode, index){
+    lightboxMode = mode;
+    if (mode === 'work'){
+      activeWork = index;
+      activeIndex = 0;
+    } else {
+      activeIndex = index;
+    }
+    updateLightboxImage();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    activeWork = null;
+    stopLightboxVideo();
+  }
+
+  function showNext(){
+    const total = lightboxTotal();
+    activeIndex = (activeIndex + 1) % total;
+    updateLightboxImage();
+  }
+  function showPrev(){
+    const total = lightboxTotal();
+    activeIndex = (activeIndex - 1 + total) % total;
+    updateLightboxImage();
+  }
+
+  workGrid.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openLightbox('work', Number(card.dataset.workIndex));
+  });
+
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.getElementById('lightboxNext').addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+  document.getElementById('lightboxPrev').addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') showNext();
+    if (e.key === 'ArrowLeft') showPrev();
+  });
+
+  // ---------- Lightbox swipe (touch) ----------
+  let touchStartX = 0;
+  let touchStartY = 0;
+  const SWIPE_THRESHOLD = 40;
+
+  lightbox.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, {passive:true});
+
+  lightbox.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) showNext(); else showPrev();
+  }, {passive:true});
+
+  // ---------- Photography grid ----------
+  const photos = [
+    {file:"01-Wedding couple_C copy.jpg", id:1069, title:"Wedding Couple, Yosemite", tag:"Portrait"},
+    {file:"02-The real deal copy.jpeg", id:1062, title:"The Real Deal", tag:"Street"},
+    {file:"03-Storm_King reflection.png", id:1059, title:"Storm King, Reflection", tag:"Landscape"},
+    {file:"04-ONDINE_BW_lores copy.jpg", id:1084, title:"Ondine", tag:"Portrait"},
+    {file:"05-BUILDING_DETAIL_CHELSEA_2017.png", id:1082, title:"Building Detail, Chelsea", tag:"Architecture"},
+    {file:"06-Interior_shot.jpg", id:1044, title:"Interior", tag:"Architecture"},
+    {file:"07-1997_easter_parade_Go pro.jpg", id:1024, title:"Easter Parade", tag:"Street"},
+    {file:"08-Citi bike flowers.jpg", id:1035, title:"Citi Bikes", tag:"Street"},
+    {file:"09-Q_clown_portrait.jpg", id:1074, title:"Portrait", tag:"Portrait"},
+    {file:"10-6th ave_reflection.PNG", id:1041, title:"6th Avenue, Reflection", tag:"Street"},
+    {file:"11-Park_Ave_Armory.jpg", id:1063, title:"Park Avenue Armory", tag:"Architecture"},
+    {file:"12-Circle Photogram.jpg", id:1053, title:"Circle Photogram", tag:"Abstract"},
+  ];
+  const photoGrid = document.getElementById('photoGrid');
+  photos.forEach((p, pi) => {
+    photoGrid.innerHTML += `
+      <div class="card" data-photo-index="${pi}">
+        <div class="frame"><img src="images/photography/${p.file}" onerror="this.onerror=null;this.src='https://picsum.photos/id/${p.id}/700/900';" alt="${p.title}"></div>
+      </div>`;
+  });
+
+  photoGrid.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openLightbox('photo', Number(card.dataset.photoIndex));
+  });
+
+  document.getElementById('viewGallery').addEventListener('click', (e) => {
+    e.preventDefault();
+    openLightbox('photo', 0);
+  });
+
+  // ---------- Nav scroll state ----------
+  window.addEventListener('scroll', () => {
+    document.getElementById('siteHeader').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ---------- Mobile nav toggle ----------
+  const navToggle = document.getElementById('navToggle');
+  const navlinks = document.getElementById('navlinks');
+  function closeNavMenu(){
+    navToggle.classList.remove('open');
+    navlinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }
+  navToggle.addEventListener('click', () => {
+    const open = navToggle.classList.toggle('open');
+    navlinks.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+  });
+  navlinks.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNavMenu));
+
+  // ---------- Reveal on scroll ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.15});
+  revealEls.forEach(el => io.observe(el));
+</script>
+</body>
+</html>
