@@ -87,6 +87,12 @@
     transition:opacity .6s var(--ease), transform .6s var(--ease);
   }
   header.show{opacity:1; transform:translateY(0);}
+  /* Mobile: the hamburger has no spare margin to shift into (the grid runs
+     edge-to-edge inside the same padding), so instead hide the header while
+     scrolling down over content and bring it back on scroll-up or near the top. */
+  @media (max-width:900px){
+    header.show.hide-scroll{transform:translateY(-130%);}
+  }
   nav{display:flex; align-items:center; justify-content:space-between;}
   .logo{display:flex; align-items:center; opacity:1; transition:opacity .4s var(--ease);}
   header.scrolled .logo{opacity:0;}
@@ -95,6 +101,12 @@
     display:flex; align-items:center; gap:32px; font-size:13px; letter-spacing:.03em;
     background:var(--bg);
     padding:14px 28px;
+  }
+  /* On wide screens there's empty margin outside the 1240px content column;
+     shift the nav pill/square out into that margin so it sits to the right
+     of the photo grid instead of on top of it once the header is fixed. */
+  @media (min-width:1440px){
+    .navlinks{transform:translateX(calc((100vw - 1240px)/2 - 40px));}
   }
   .navlinks a{position:relative; padding:4px 0; color:var(--ink-soft); transition:color .25s;}
   .navlinks a:hover{color:var(--ink);}
@@ -845,8 +857,25 @@
   });
 
   // ---------- Nav scroll state ----------
+  const siteHeader = document.getElementById('siteHeader');
+  let lastScrollY = window.scrollY;
   window.addEventListener('scroll', () => {
-    document.getElementById('siteHeader').classList.toggle('scrolled', window.scrollY > 40);
+    const y = window.scrollY;
+    siteHeader.classList.toggle('scrolled', y > 40);
+
+    // Mobile only: hide the header (and its hamburger) while scrolling down
+    // over the photo grid, so it never sits on top of a photo at rest; show
+    // it again on scroll-up, near the top, or while the menu itself is open.
+    if (window.innerWidth <= 900 && !navlinks.classList.contains('open')) {
+      if (y <= 40) {
+        siteHeader.classList.remove('hide-scroll');
+      } else if (y > lastScrollY) {
+        siteHeader.classList.add('hide-scroll');
+      } else if (y < lastScrollY) {
+        siteHeader.classList.remove('hide-scroll');
+      }
+    }
+    lastScrollY = y;
   });
 
   // ---------- Mobile nav toggle ----------
@@ -861,6 +890,7 @@
     const open = navToggle.classList.toggle('open');
     navlinks.classList.toggle('open', open);
     navToggle.setAttribute('aria-expanded', String(open));
+    if (open) siteHeader.classList.remove('hide-scroll');
   });
   navlinks.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNavMenu));
 
