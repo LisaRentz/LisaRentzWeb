@@ -87,10 +87,10 @@
     transition:opacity .6s var(--ease), transform .6s var(--ease);
   }
   header.show{opacity:1; transform:translateY(0);}
-  /* Mobile: the hamburger has no spare margin to shift into (the grid runs
-     edge-to-edge inside the same padding), so instead hide the header while
-     scrolling down over content and bring it back on scroll-up or near the top. */
-  @media (max-width:900px){
+  /* Below 1440px there's no spare margin to shift the nav into (the grid runs
+     right up to it), so instead hide the header while scrolling down over
+     content and bring it back on scroll-up or near the top. */
+  @media (max-width:1439px){
     header.show.hide-scroll{transform:translateY(-130%);}
   }
   nav{display:flex; align-items:center; justify-content:space-between;}
@@ -863,12 +863,18 @@
     const y = window.scrollY;
     siteHeader.classList.toggle('scrolled', y > 40);
 
-    // Mobile only: hide the header (and its hamburger) while scrolling down
-    // over the photo grid, so it never sits on top of a photo at rest; show
-    // it again on scroll-up, near the top, or while the menu itself is open.
-    if (window.innerWidth <= 900 && !navlinks.classList.contains('open')) {
+    // Below 1440px the nav has no margin to sit in, so it must not rest over
+    // the photo grid. Narrower desktop windows (901-1439px): hidden whenever
+    // the page is scrolled, in either direction, and shown only near the top.
+    // Mobile (<=900px): hidden while scrolling down, shown again on scroll-up,
+    // near the top, or while the menu itself is open. Wider screens shift the
+    // nav into the margin instead.
+    const w = window.innerWidth;
+    if (w < 1440 && !navlinks.classList.contains('open')) {
       if (y <= 40) {
         siteHeader.classList.remove('hide-scroll');
+      } else if (w > 900) {
+        siteHeader.classList.add('hide-scroll');
       } else if (y > lastScrollY) {
         siteHeader.classList.add('hide-scroll');
       } else if (y < lastScrollY) {
